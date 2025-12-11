@@ -1,42 +1,54 @@
-# Enterprise Data Classification & Policy Framework
+# Global Policy Framework & Classification Standards
 
-## Data Classification Levels
+## 1. Classification Methodology
+We follow a 4-tier data classification model aligned with NIST 800-53 and ISO 27001.
 
-| Level | Label | Description | Examples | Handling Controls |
+| Class | Tag | Definition | Examples | DLP Action |
 | :--- | :--- | :--- | :--- | :--- |
-| **L1** | **Public** | Information intended for public release. | Press releases, Marketing material. | No restrictions. |
-| **L2** | **Internal** | Data for internal operations only. | Employee directories, policies, internal memos. | Encryption at rest; Access Control Lists (ACLs). |
-| **L3** | **Confidential** | Sensitive business data. Harmful if leaked. | Financial reports (pre-release), Customer lists, Source code. | DLP Enforced; Encryption in transit/rest; 2FA required. |
-| **L4** | **Restricted** | Highly sensitive PII/PCI/PHI. Regulatory impact. | SSN, Credit Card #s, Health records, Encryption Keys. | Strict DLP Blocking; Just-in-Time access; Full Audit logging. |
+| **C1** | `PUBLIC` | Information intended for public consumption. | Marketing brochures, Press releases. | **Monitor Only** |
+| **C2** | `INTERNAL` | Business operations data. | Org charts, Internal Wikis, Policies. | **Monitor & Watermark** |
+| **C3** | `CONFIDENTIAL` | Sensitive business data; significant harm if leaked. | Start-up configs, Pricing models, Customer lists. | **Block (External)** |
+| **C4** | `RESTRICTED` | Regulatory/Legal impact; notification required upon breach. | SSN, Credit Cards, ePHI, Encryption Keys. | **Block & Quarantine** |
 
-## Detection Rules & Patterns (Regex)
+## 2. Technical Rule Definitions
 
-Effective DLP requires precise detection to minimize False Positives. Below are standard definitions used in our policies.
+### A. Pattern Matching (Regex Library)
 
-### 1. Credit Card Numbers (PCI-DSS)
-**Pattern:** Matches major card brands, utilizes Luhn algorithm check.
+**1. GDPR: EU IBAN (International Bank Account Number)**
+*Rationale*: Financial compliance for EU operations.
 ```regex
-\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b
+\b[A-Z]{2}[0-9]{2}(?:[ ]?[0-9]{4}){4}(?!(?:[ ]?[0-9]){3})(?:[ ]?[0-9]{1,2})?\b
 ```
 
-### 2. US Social Security Number (PII)
-**Pattern:** Keying off structure `AAA-GG-SSSS`.
+**2. AWS Access Key ID (Secrets)**
+*Rationale*: Preventing cloud compromise.
 ```regex
-\b(?!000|666|9\d{2})[0-9]{3}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}\b
-```
-*Tuning:* Combine with keywords "SSN", "Social Security", "Tax ID" to reduce noise.
-
-### 3. Oracle Cloud Infrastructure (OCI) Keys (Secret Detection)
-**Pattern:** Detection of potential hardcoded API keys or private keys.
-```regex
-(?:ocid1\.user\.oc1\..+|[A-Fa-f0-9]{64})
+\b(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}\b
 ```
 
-## Policy Action Matrix
+**3. US & Canada Phones (Contextual)**
+*Rationale*: High false positive potential. Must be near keywords.
+```regex
+(?:\+?1[-. ]?)?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})
+```
+*Proximity Keywords required (within 30 chars):* "Phone", "Mobile", "Cell", "Contact".
 
-| Source Channel | L1 (Public) | L2 (Internal) | L3 (Confidential) | L4 (Restricted) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Corporate Email** | Allow | Allow | Notify Manager | **Block & Alert** |
-| **Web Upload (SaaS)** | Allow | Allow | **Block (Unsanctioned)** | **Block & Alert** |
-| **USB Storage** | Allow | Read-Only | **Block** | **Block** |
-| **Printer** | Allow | Allow | Watermark | **Block** |
+### B. Logical Combinations (Compound Rules)
+
+**Rule: High-Confidence PCI Data**
+> IF (Regex match "CreditCard")
+> AND (Luhn Check == PASS)
+> AND (Keyword match "CVC" OR "Expiry" OR "Visa" OR "Mastercard" within 50 chars)
+> THEN Severity = CRITICAL
+
+**Rule: Source Code Leakage**
+> IF (File Extension IN `.py`, `.c`, `.cpp`, `.java`, `.go`)
+> AND (Keyword match "INTERNAL_USE_ONLY" OR "Copyright 2024 Corp")
+> AND (Destination != "github.com/corp-org/*")
+> THEN Action = BLOCK
+
+## 3. Policy Tuning Lifecycle
+Policies are not static. We employ a weekly tuning cycle:
+1.  **Monitor Mode**: Run new rule for 7 days without blocking.
+2.  **FPR Analysis**: Analyst reviews sample alerts. If False Positive Rate > 5%, refine Regex or add logical AND conditions.
+3.  **Active Blocking**: Promote to block mode only after FPR < 1%.

@@ -1,29 +1,35 @@
-# Oracle Principal DLP Engineer Portfolio
+# Advanced DLP & Insider Risk Management Framework
 
-## Overview
-This repository serves as a technical portfolio for the **Principal DLP Engineer** role at **Oracle**. It demonstrates a comprehensive approach to Data Loss Prevention (DLP), Incident Response (IR), and Insider Threat Management, showcasing both strategic planning and hands-on technical implementation skills.
+## Project Overview
+This repository hosts a comprehensive, production-grade framework for **Data Loss Prevention (DLP)** and **Incident Response (IR)**. It enables security engineering teams to protect critical assets across Endpoint, Network, and Hybrid Cloud environments.
 
-## Repository Structure
+Unlike standard compliance checklists, this project focuses on **technical implementation**, **automation**, and **complex behavioral analysis** to detect sophisticated data exfiltration attempts.
 
-### 1. DLP Strategy & Architecture (`/docs`)
-- **Policy Framework**: Detailed data classification standards and regex pattern definitions for PII, PCI, and HIPAA.
-- **DLP Architecture**: High-level design for integrating DLP across Endpoint, Network, and Cloud (OCI/SaaS) layers.
+## Core Competencies
+*   **Strategic Architecture**: Hybrid-cloud design integrating CASB, SWG, and Endpoint protection.
+*   **Policy Engineering**: High-fidelity detection logic using Regex, EDM (Exact Data Match), and IDM (Indexed Document Matching).
+*   **Incident Response**: Detailed playbooks for high-severity scenarios (Insider Threat, Ransomware exfiltration).
+*   **Security Automation**: Python and Bash tooling to reduce analyst fatigue and MTTR.
 
-### 2. Incident Response Playbooks (`/playbooks`)
-- **Standard Operating Procedure (SOP)**: End-to-end workflow for triage, investigation, and remediation of DLP incidents.
-- **Insider Threat Scenario**: A specialized playbook for high-risk user behavior analytics.
+## Repository Map
 
-### 3. Technical Implementation (`/scripts`)
-- **`pii_scanner.py`**: A custom Python utility demonstrating regex-based scanning logic and False Positive reduction techniques.
-- **`log_analyzer.sh`**: Automation scripts for rapid log parsing during active investigations.
+### 1. Strategic Architecture (`/docs`)
+*   **`dlp-architecture.md`**: Full-stack design with Mermaid diagrams showing integration usage of ICAP, REST APIs, and Agents.
+*   **`policy-framework.md`**: Advanced classification standards, regex patterns (GDPR/PCI/HIPAA), and logic for reducing false positives.
 
-### 4. Reporting & Metrics (`/reports`)
-- **Executive Summary**: Sample monthly reporting template focusing on risk reduction and DLP efficacy metrics.
+### 2. Operational Playbooks (`/playbooks`)
+*   **`ir-workflow.md`**: Standard Operating Procedures (SOP) with decision trees.
+*   **`scenario-insider-exit.md`**: Detection and response for departing employees (Flight Risk).
+*   **`scenario-ransomware-exfil.md`**: Handling double-extortion ransomware scenarios where data is stolen before encryption.
+*   **`scenario-cloud-exposure.md`**: Response to public S3 buckets or misplaced keys in GitHub.
 
-## Key Competencies Demonstrated
-- **Enterprise Data Protection**: Designing scalable DLP policies for complex organizations.
-- **Automation**: Utilizing Python/Bash to streamline incident response and reduce MTTR (Mean Time To Resolve).
-- **Compliance methodology**: Mapping technical controls to regulatory requirements (GDPR, CCPA, PCI-DSS).
+### 3. Engineering & Automation (`/scripts`)
+*   **`pii_scanner.py`**: multi-threaded scanner with Luhn validation and context awareness.
+*   **`fingerprint_gen.py`**: A utility to demonstrate how Exact Data Matching (EDM) hashing works.
+*   **`log_analyzer.sh`**: Log parsing utility for SIEM/Syslog exports.
+
+### 4. Reporting & Analytics (`/reports`)
+*   **`metrics_dashboard.md`**: KPI definitions and visualization prototypes for CISO reporting.
 
 ---
-*Created by [Your Name] for Oracle Interview Process*
+*Maintained by [Your Name]*

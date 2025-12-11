@@ -1,42 +1,60 @@
-# DLP Incident Response Standard Operating Procedure (SOP)
+# Incident Response SOP: The "Kill Chain" Approach
 
-## Workflow Overview
-This document outlines the standard process for handling DLP alerts triggered by the Symantec/Forcepoint/McAfee/Oracle Security stack.
+## 1. The Incident Response Lifecycle (NIST 800-61)
+This playbook adheres to the NIST standard: Preparation, Detection & Analysis, Containment, Eradication & Recovery, Post-Incident Activity.
 
 ```mermaid
 graph TD
-    A[Alert Triggered] --> B{Severity Level?}
-    B -- Low/Info --> C[Log for Analytics]
-    B -- High/Critical --> D[Assign to Analyst]
-    D --> E{True Positive?}
-    E -- No --> F[Close as False Positive & Tune Policy]
-    E -- Yes --> G[Determine Intent]
-    G -- Accidental --> H[User Coaching/Notification]
-    G -- Malicious --> I[Escalate to SOC/HR/Legal]
-    I --> J[Containment (Disable Account/Revoke Access)]
-    H --> K[Close Incident]
-    J --> K
+    Start((Alert)) --> Triage[Phase 1: Triage]
+    Triage -->|False Positive| Tune[Tune Policy]
+    Triage -->|True Positive| Classify{Severity?}
+    
+    Classify -- Low --> Notify[Notify User & Manager]
+    Classify -- High --> Investigate[Phase 2: Deep Dive]
+    
+    Investigate -->|Artifacts Found| Scope[Scope the Breach]
+    Scope --> Contain[Phase 3: Containment]
+    
+    Contain -->|Endpoint| Isolate[Isolate Host]
+    Contain -->|Cloud| Revoke[Revoke Tokens]
+    
+    Contain --> Remediation[Phase 4: Remediation]
+    Remediation --> Report[Phase 5: Post-Mortem]
 ```
 
-## Phase 1: Triage (Analyst Tier 1)
-1.  **Validate content:** Review the matched data snippet. Is it actual PII/Source Code?
-2.  **Context Check:**
-    *   **Who:** Is the user authorized? (e.g., HR sending payroll data *is* normal).
-    *   **Where:** Destination URL/Email. Is it a known partner domain?
-    *   **How much:** Volume analysis. 1 record vs 10,000 records.
+## 2. Detailed Phase Actions
 
-## Phase 2: Investigation (Analyst Tier 2)
-*   **Cross-Reference:** Check logs in SIEM. Did the user recently download this data?
-*   **Behavioral Analysis:** any other recent alerts? (e.g., "Resume upload", "Job search keywords").
-*   **Asset Lookups:** Is the device compliant?
+### Phase 1: Triage & Validation
+**Objective:** Eliminate noise.
+*   **Analyst Action:**
+    *   View the "Snippet" (the captured data). Does it look like actual sensitive data?
+    *   Check "Destination". Is it a known partner? (e.g., uploading to `partners.audit-firm.com`).
+    *   **Tooling:** Use `log_analyzer.sh` to see if this is an isolated event or a spike.
 
-## Phase 3: Containment & Remediation
-*   **Accidental:** Send automated email template: *"Hi, you recently violated policy X. Please use the authorized Secure Transfer Portal."*
-*   **Malicious:**
-    1.  Capture Evidence (Screenshots, PCAP).
-    2.  Isolate Endpoint (Network Quarantine).
-    3.  Engage Legal/HR for disciplinary action.
+### Phase 2: Investigation (Forensics)
+**Objective:** Determine intent (Malicious vs. Negligent).
+*   **Check List:**
+    1.  **HR Status:** Is user serving notice?
+    2.  **Web History:** Did they search for "how to bypass DLP" or "job sites"?
+    3.  **File Operations:** Did they rename the file before upload? (e.g., `passwords.xlsx` -> `recipes.xlsx` is a huge red flag).
+    4.  **USB History:** Have they used this USB device before?
 
-## Phase 4: Feedback Loop
-*   Update Regex if false positive.
-*   Update Allow-lists (White-listing) for new business partners.
+### Phase 3: Containment strategies
+*   **Soft Containment (Low Risk):**
+    *   Encrypt the file on the USB stick remotely (if supported).
+    *   Delete the shared link in OneDrive/Google Drive.
+*   **Hard Containment (High Risk):**
+    *   **Network Isolation:** Cut internet access to the laptop immediately.
+    *   **Account Lockout:** Suspend Active Directory and SSO (Okta/Ping) access.
+
+### Phase 4: Legal & Notification
+*   If **>500 PII records** are confirmed lost:
+    *   Engage Privacy Officer immediately (GDPR 72-hour clock starts).
+    *   Preserve chain of custody for all logs.
+
+## 3. Escalation Matrix
+| Scenario | Primary Contact | SLA |
+| :--- | :--- | :--- |
+| **Accidental PII sharing** | User's Manager | 24 Hours |
+| **Suspected Insider Threat** | HR & CISO | **1 Hour** |
+| **Active Exfiltration (Live)** | SOC Lead | **15 Minutes** |
