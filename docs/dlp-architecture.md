@@ -6,37 +6,8 @@ The modern DLP stack must move beyond simple regex matching. This framework impl
 ## 2. Global Architecture Diagram
 This high-level design illustrates the flow of data and inspection points across the enterprise.
 
-```mermaid
-graph TB
-    subgraph "Endpoint Layer (The Edge)"
-        Laptop[Corp Laptop] -->|Writes| USB[USB Storage]
-        Laptop -->|Prints| Printer
-        Laptop -->|Uploads| Web[Web Browser]
-        Agent[DLP Agent] -.->|Intercepts| Laptop
-    end
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/c6a7fde3-79e2-417a-af0b-cab60d80af17" />
 
-    subgraph "Network Layer (The Pipe)"
-        Web --> Proxy[SWG / CASB Proxy]
-        Proxy -->|ICAP| DLPServer[DLP Inspection Engine]
-        Email[Corp Email] -->|SMTP| MTA[Email Gateway]
-        MTA -->|ICAP| DLPServer
-    end
-
-    subgraph "Cloud & SaaS (The Backend)"
-        API[API Integration] -->|Scans| O365[Office 365]
-        API -->|Scans| Slack
-        API -->|Scans| AWS[AWS/GCP/Azure]
-    end
-
-    subgraph "Security Operations"
-        DLPServer -->|Alerts| SIEM[SIEM (Splunk/Sentinel)]
-        Agent -->|Telemetry| SIEM
-        SIEM -->|Triggers| SOAR[SOAR Playbooks]
-    end
-
-    classDef protect fill:#f9f,stroke:#333;
-    class Agent,DLPServer,API protect;
-```
 
 ## 3. Detailed Prevention Layers
 
