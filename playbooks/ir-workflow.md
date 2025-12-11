@@ -12,13 +12,22 @@ graph TD
     Classify -- Low --> Notify[Notify User & Manager]
     Classify -- High --> Investigate[Phase 2: Deep Dive]
     
-    Investigate -->|Artifacts Found| Scope[Scope the Breach]
-    Scope --> Contain[Phase 3: Containment]
+    Investigate -->|Confirmed Breach| Scope[Scope & Impact Analysis]
+    
+    Scope --> StakeholderCheck{Legal / ER Required?}
+    StakeholderCheck -- Yes --> EngageLeg[Engage Legal & Employee Relations]
+    EngageLeg --> RegCheck{Public/Regulator Disclosure?}
+    
+    RegCheck -- Yes --> ExtComms[Trigger External Comms / PR]
+    ExtComms --> Contain[Phase 3: Containment]
+    RegCheck -- No --> Contain
+    StakeholderCheck -- No --> Contain
     
     Contain -->|Endpoint| Isolate[Isolate Host]
     Contain -->|Cloud| Revoke[Revoke Tokens]
     
-    Contain --> Remediation[Phase 4: Remediation]
+    Isolate --> Remediation[Phase 4: Remediation]
+    Revoke --> Remediation
     Remediation --> Report[Phase 5: Post-Mortem]
 ```
 
