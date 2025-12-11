@@ -23,13 +23,17 @@ Unlike standard compliance checklists, this project focuses on **technical imple
 *   **`scenario-ransomware-exfil.md`**: Handling double-extortion ransomware scenarios where data is stolen before encryption.
 *   **`scenario-cloud-exposure.md`**: Response to public S3 buckets or misplaced keys in GitHub.
 
-### 3. Engineering & Automation (`/scripts`)
+### 3. Engineering & Automation (`/scripts` & `.github`)
 *   **`pii_scanner.py`**: multi-threaded scanner with Luhn validation and context awareness.
 *   **`fingerprint_gen.py`**: A utility to demonstrate how Exact Data Matching (EDM) hashing works.
-*   **`log_analyzer.sh`**: Log parsing utility for SIEM/Syslog exports.
+*   **`dlp-scanner.yml`**: GitHub Actions workflow demonstrating **DevSecOps Shift-Left** scanning.
 
-### 4. Reporting & Analytics (`/reports`)
-*   **`metrics_dashboard.md`**: KPI definitions and visualization prototypes for CISO reporting.
+### 4. Infrastructure as Code (`/infrastructure`)
+*   **`terraform/main.tf`**: Complete **Terraform** configuration for AWS Macie (Cloud DLP) implementation including S3 scoping and SNS alerting.
+
+### 5. Reporting & Analytics (`/analysis`)
+*   **`incident_trending.ipynb`**: **Jupyter Notebook** for data science visualization of DLP attack vectors using Pandas/Matplotlib.
+*   **`vendor-comparison.md`**: Strategic decision matrix for selecting Enterprise DLP vendors (Symantec vs Zscaler vs Purview).
 
 ---
 *Maintained by Raj
